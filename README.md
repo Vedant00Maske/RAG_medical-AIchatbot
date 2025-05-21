@@ -1,6 +1,6 @@
 # Medical-Chatbot
 
-> **Note:** This project uses the Llama2 model, which runs locally on your machine. Due to this, online deployment is **not possible** for this project.
+> **Note:** This project uses the Llama2 model(it being a free model to run with local resources), which runs locally on your machine. Due to this, online deployment is **not possible** for this project.
 
 ## How to Run Locally
 
@@ -44,3 +44,5 @@ Below are some backend process screenshots:
 ![Backend Screenshot 3](screenshots/3.png)
 ![Backend Screenshot 4](screenshots/4.png)
 ![Backend Screenshot 5](screenshots/5.png)
+
+You can also check the sample question set and the answers given by the chatbot in the exel file.
