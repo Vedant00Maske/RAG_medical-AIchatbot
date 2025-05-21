@@ -36,7 +36,7 @@ def load_and_split_documents(pdf_path: str, chunk_size: int = 1000, chunk_overla
         st.error(f"Error loading document: {str(e)}")
         return []
 
-def setup_vector_store(documents: List, model_name: str = "llama2", temperature: float = 0.45) -> Any:
+def setup_vector_store(documents: List, model_name: str = "llama2", temperature: float = 0.35) -> Any:
     """
     Create a vector store from documents using Ollama embeddings
     
