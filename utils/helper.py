@@ -12,20 +12,20 @@ from typing import List, Dict, Any, Tuple
 
 def load_and_split_documents(pdf_path: str, chunk_size: int = 1000, chunk_overlap: int = 20) -> List:
     """
-    Load PDF document and split it into chunks
-    
+    Load PDF document and split it into chunks.
     Args:
-        pdf_path: Path to the PDF file
-        chunk_size: Size of each text chunk
-        chunk_overlap: Overlap between chunks
-        
+        pdf_path: Path to the PDF file.
+        chunk_size: Size of each text chunk.
+        chunk_overlap: Overlap between chunks.
     Returns:
-        List of document chunks
+        List of document chunks.
     """
     try:
+        # Load the PDF using LangChain's PyPDFLoader
         loader = PyPDFLoader(pdf_path)
         docs = loader.load()
         
+        # Split the loaded documents into smaller chunks for processing
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=chunk_size, 
             chunk_overlap=chunk_overlap
@@ -33,52 +33,54 @@ def load_and_split_documents(pdf_path: str, chunk_size: int = 1000, chunk_overla
         documents = text_splitter.split_documents(docs)
         return documents
     except Exception as e:
+        # Display error in Streamlit UI if loading fails
         st.error(f"Error loading document: {str(e)}")
         return []
 
 def setup_vector_store(documents: List, model_name: str = "llama2", temperature: float = 0.35) -> Any:
     """
-    Create a vector store from documents using Ollama embeddings
-    
+    Create a vector store from documents using Ollama embeddings.
     Args:
-        documents: List of document chunks
-        model_name: Name of the embedding model
-        temperature: Temperature parameter for embeddings
-        
+        documents: List of document chunks.
+        model_name: Name of the embedding model.
+        temperature: Temperature parameter for embeddings.
     Returns:
-        FAISS vector store
+        FAISS vector store.
     """
     try:
+        # Create embeddings for the documents using Ollama
         embeddings = OllamaEmbeddings(model=model_name, temperature=temperature)
+        # Store the embeddings in a FAISS vector store for similarity search
         db = FAISS.from_documents(documents, embeddings)
         return db
     except Exception as e:
+        # Display error in Streamlit UI if vector store creation fails
         st.error(f"Error setting up vector store: {str(e)}")
         return None
 
 def setup_llm(model_name: str = "llama2") -> Any:
     """
-    Initialize the LLM model
-    
+    Initialize the LLM model.
     Args:
-        model_name: Name of the model to use
-        
+        model_name: Name of the model to use.
     Returns:
-        Initialized LLM
+        Initialized LLM.
     """
     try:
+        # Initialize the Ollama LLM with the specified model name
         return Ollama(model=model_name)
     except Exception as e:
+        # Display error in Streamlit UI if LLM setup fails
         st.error(f"Error setting up LLM: {str(e)}")
         return None
 
 def create_medical_prompt() -> ChatPromptTemplate:
     """
-    Create a chat prompt template for medical questions
-    
+    Create a chat prompt template for medical questions.
     Returns:
-        ChatPromptTemplate for medical questions
+        ChatPromptTemplate for medical questions.
     """
+    # Define a prompt template to instruct the LLM on how to answer
     return ChatPromptTemplate.from_template("""
     Answer the following medical question based only on the provided context.
     Think step by step before providing a detailed answer.
@@ -95,59 +97,56 @@ def create_medical_prompt() -> ChatPromptTemplate:
 
 def setup_retrieval_chain(db: Any, llm: Any) -> Any:
     """
-    Set up the retrieval chain for answering questions
-    
+    Set up the retrieval chain for answering questions.
     Args:
-        db: Vector store database
-        llm: Language model
-        
+        db: Vector store database.
+        llm: Language model.
     Returns:
-        Retrieval chain
+        Retrieval chain.
     """
     try:
-        # Create prompt
+        # Create the prompt template for the LLM
         prompt = create_medical_prompt()
         
-        # Create document chain
+        # Create a document chain that combines the LLM and prompt
         document_chain = create_stuff_documents_chain(llm, prompt)
         
-        # Create retriever
+        # Convert the vector store into a retriever for document search
         retriever = db.as_retriever()
         
-        # Create retrieval chain
+        # Create a retrieval chain that uses the retriever and document chain
         retrieval_chain = create_retrieval_chain(retriever, document_chain)
         
         return retrieval_chain
     except Exception as e:
+        # Display error in Streamlit UI if retrieval chain setup fails
         st.error(f"Error setting up retrieval chain: {str(e)}")
         return None
 
 def format_medical_answer(answer: str) -> str:
     """
-    Format medical answer for better readability
-    
+    Format medical answer for better readability.
     Args:
-        answer: Raw answer from the model
-        
+        answer: Raw answer from the model.
     Returns:
-        Formatted answer
+        Formatted answer.
     """
-    # Add any additional formatting logic here
+    # Add any additional formatting logic here if needed
     return answer
 
 def get_sources_from_response(response: Dict[str, Any]) -> List[str]:
     """
-    Extract source documents from the response
-    
+    Extract source documents from the response.
     Args:
-        response: Response from the retrieval chain
-        
+        response: Response from the retrieval chain.
     Returns:
-        List of source document references
+        List of source document references.
     """
     sources = []
+    # Check if context is present and is a list of documents
     if 'context' in response and isinstance(response['context'], list):
         for doc in response['context']:
+            # Extract the 'source' metadata if available
             if hasattr(doc, 'metadata') and 'source' in doc.metadata:
                 source = doc.metadata['source']
                 if source not in sources:
