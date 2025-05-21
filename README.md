@@ -1,6 +1,6 @@
 # Medical-Chatbot
 
-> **Note:** This project uses the Llama2 model(it being a free model to run with local resources), which runs locally on your machine. Due to this, online deployment is **not possible** for this project.
+> **Note:** This project uses the Llama2 model (it being a free model to run with local resources), which runs locally on your machine. Due to this, online deployment is **not possible** for this project.
 
 ## How to Run Locally
 
